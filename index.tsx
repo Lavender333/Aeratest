@@ -1,3 +1,8 @@
+// Safari < 15.4 lacks structuredClone; provide a lightweight fallback for our plain-data usage.
+if (typeof globalThis.structuredClone !== 'function') {
+  globalThis.structuredClone = (value: any) => JSON.parse(JSON.stringify(value));
+}
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
