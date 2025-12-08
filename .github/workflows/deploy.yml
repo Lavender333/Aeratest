@@ -34,6 +34,7 @@ jobs:
         run: |
           rm -rf docs
           cp -R dist docs
+          echo "appandwebsitetesting.site" > docs/CNAME
 
       - name: Commit and push if changes
         env:
