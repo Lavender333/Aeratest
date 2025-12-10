@@ -116,6 +116,8 @@ export interface ReplenishmentRequest {
   stocked?: boolean; // Marked as stocked in hub inventory
   stockedAt?: string; // Timestamp when stocked was confirmed
   stockedQuantity?: number; // Quantity applied to inventory
+  orgConfirmed?: boolean; // Org confirmed delivery at fulfill step
+  orgConfirmedAt?: string;
   synced?: boolean; // Offline sync status
 }
 

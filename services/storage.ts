@@ -378,14 +378,28 @@ export const StorageService = {
   fulfillReplenishmentRequest(
     requestId: string,
     delivered: Partial<OrgInventory>,
-    status: 'FULFILLED' | 'APPROVED' = 'FULFILLED'
+    status: 'FULFILLED' | 'APPROVED' = 'FULFILLED',
+    orgConfirmed: boolean = false
   ) {
     const db = this.getDB();
     const reqIdx = db.replenishmentRequests.findIndex(r => r.id === requestId);
     if (reqIdx === -1) return false;
 
+    const request = db.replenishmentRequests[reqIdx];
     db.replenishmentRequests[reqIdx].status = status;
     db.replenishmentRequests[reqIdx].fulfilledAt = new Date().toISOString();
+    db.replenishmentRequests[reqIdx].orgConfirmed = orgConfirmed;
+    if (orgConfirmed) {
+      db.replenishmentRequests[reqIdx].orgConfirmedAt = new Date().toISOString();
+      const existing = this.getOrgInventory(request.orgId);
+      const updatedInventory: OrgInventory = {
+        water: existing.water + (Number(delivered.water) || 0),
+        food: existing.food + (Number(delivered.food) || 0),
+        blankets: existing.blankets + (Number(delivered.blankets) || 0),
+        medicalKits: existing.medicalKits + (Number(delivered.medicalKits) || 0)
+      };
+      this.updateOrgInventory(request.orgId, updatedInventory);
+    }
     this.saveDB(db);
     return true;
   },

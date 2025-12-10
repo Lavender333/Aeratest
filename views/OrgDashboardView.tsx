@@ -32,7 +32,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
   const [selectedItem, setSelectedItem] = useState('Water Cases');
   const [requestAmount, setRequestAmount] = useState(10);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [fulfillDraft, setFulfillDraft] = useState<{ id: string | null; quantity: number }>({ id: null, quantity: 0 });
+  const [fulfillDraft, setFulfillDraft] = useState<{ id: string | null; quantity: number; orgConfirmed: boolean }>({ id: null, quantity: 0, orgConfirmed: false });
   const [fulfillLoading, setFulfillLoading] = useState(false);
   const [stockLoading, setStockLoading] = useState(false);
 
@@ -190,7 +190,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
   };
 
   const handleStartFulfill = (req: ReplenishmentRequest) => {
-    setFulfillDraft({ id: req.id, quantity: req.quantity });
+    setFulfillDraft({ id: req.id, quantity: req.quantity, orgConfirmed: false });
   };
 
   const handleSubmitFulfill = () => {
@@ -215,13 +215,21 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
       return;
     }
 
-    const confirmMsg = `Mark as fulfilled?\nItem: ${request.item}\nDelivered: ${fulfillDraft.quantity}\nOrg: ${request.orgName}`;
+    const confirmMsg = `Mark as fulfilled?\nItem: ${request.item}\nDelivered: ${fulfillDraft.quantity}\nOrg: ${request.orgName}\nOrg confirmed receipt: ${fulfillDraft.orgConfirmed ? 'Yes' : 'No'}`;
     if (!window.confirm(confirmMsg)) return;
 
     setFulfillLoading(true);
-    StorageService.fulfillReplenishmentRequest(request.id, { [key]: fulfillDraft.quantity }, 'FULFILLED');
+    StorageService.fulfillReplenishmentRequest(
+      request.id,
+      { [key]: fulfillDraft.quantity },
+      'FULFILLED',
+      fulfillDraft.orgConfirmed
+    );
+    if (fulfillDraft.orgConfirmed) {
+      setInventory(StorageService.getOrgInventory(communityId));
+    }
     setRequests(StorageService.getOrgReplenishmentRequests(communityId));
-    setFulfillDraft({ id: null, quantity: 0 });
+    setFulfillDraft({ id: null, quantity: 0, orgConfirmed: false });
     setFulfillLoading(false);
   };
 
@@ -688,11 +696,19 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
                               value={fulfillDraft.quantity}
                               onChange={(e) => setFulfillDraft(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
                             />
+                            <label className="flex items-center gap-1 text-[11px] text-slate-600 font-bold">
+                              <input 
+                                type="checkbox" 
+                                checked={fulfillDraft.orgConfirmed} 
+                                onChange={(e) => setFulfillDraft(prev => ({ ...prev, orgConfirmed: e.target.checked }))}
+                              />
+                              Org confirmed
+                            </label>
                             <Button size="sm" onClick={handleSubmitFulfill} disabled={fulfillLoading}>
                               {fulfillLoading ? <Loader2 size={14} className="animate-spin mr-1" /> : null}
                               Mark Fulfilled
                             </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setFulfillDraft({ id: null, quantity: 0 })}>Cancel</Button>
+                            <Button size="sm" variant="ghost" onClick={() => setFulfillDraft({ id: null, quantity: 0, orgConfirmed: false })}>Cancel</Button>
                           </div>
                         ) : (
                           <Button size="sm" variant="outline" onClick={() => handleStartFulfill(req)}>
