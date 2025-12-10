@@ -44,6 +44,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const [connectedOrg, setConnectedOrg] = useState<string | null>(null);
   const [orgPopulation, setOrgPopulation] = useState<number>(0);
   const [orgInventory, setOrgInventory] = useState<OrgInventory | null>(null);
+  const [orgMemberCount, setOrgMemberCount] = useState<number>(0);
   const [tickerMessage, setTickerMessage] = useState('');
   
   // Status Ping State
@@ -65,6 +66,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
          setConnectedOrg(org.name);
          setOrgPopulation(org.registeredPopulation || 0);
          setOrgInventory(StorageService.getOrgInventory(org.id));
+         setOrgMemberCount(StorageService.getOrgMembers(org.id).length);
        }
     }
     
@@ -98,6 +100,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
          setOrgInventory(StorageService.getOrgInventory(updatedProfile.communityId));
          const org = StorageService.getOrganization(updatedProfile.communityId);
          if (org) setOrgPopulation(org.registeredPopulation || 0);
+         setOrgMemberCount(StorageService.getOrgMembers(updatedProfile.communityId).length);
        }
     };
     
@@ -223,7 +226,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
 
       {isOrgAdmin && connectedOrg && orgInventory && (
         (() => {
-          const status = getInventoryStatuses(orgInventory, orgPopulation);
+          const coverageBase = orgMemberCount || orgPopulation;
+          const status = getInventoryStatuses(orgInventory, coverageBase);
           return (
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
@@ -235,6 +239,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
               Manage
             </Button>
           </div>
+          <p className="text-[11px] text-slate-500 font-bold">Members: {orgMemberCount || orgPopulation}</p>
           <div className="grid grid-cols-2 gap-3">
             {[
               { label: 'Water Cases', value: orgInventory.water, unit: 'cases', key: 'water' as const },
