@@ -335,6 +335,38 @@ export const StorageService = {
     return db.replenishmentRequests || [];
   },
 
+  getReplenishmentAggregation(): ReplenishmentAggregate[] {
+    const db = this.getDB();
+    const requests = db.replenishmentRequests || [];
+    const map: Record<string, ReplenishmentAggregate> = {};
+
+    requests.forEach(req => {
+      if (!map[req.item]) {
+        map[req.item] = {
+          item: req.item,
+          pending: 0,
+          approved: 0,
+          fulfilled: 0,
+          totalRequested: 0,
+          pendingQuantity: 0,
+        };
+      }
+      const agg = map[req.item];
+      agg.totalRequested += req.quantity || 0;
+      if (req.status === 'PENDING') {
+        agg.pending += 1;
+        agg.pendingQuantity += req.quantity || 0;
+      } else if (req.status === 'APPROVED') {
+        agg.approved += 1;
+        agg.pendingQuantity += req.quantity || 0;
+      } else if (req.status === 'FULFILLED') {
+        agg.fulfilled += 1;
+      }
+    });
+
+    return Object.values(map).sort((a, b) => b.pendingQuantity - a.pendingQuantity);
+  },
+
   getOrgReplenishmentRequests(orgId: string): ReplenishmentRequest[] {
     const db = this.getDB();
     const requests = db.replenishmentRequests || [];

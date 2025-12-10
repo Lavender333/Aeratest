@@ -119,6 +119,15 @@ export interface ReplenishmentRequest {
   synced?: boolean; // Offline sync status
 }
 
+export interface ReplenishmentAggregate {
+  item: string;
+  pending: number;
+  approved: number;
+  fulfilled: number;
+  totalRequested: number;
+  pendingQuantity: number;
+}
+
 export interface RoleDefinition {
   id: UserRole;
   label: string;
