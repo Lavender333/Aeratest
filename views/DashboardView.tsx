@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '../components/Card';
-import { ViewState, HelpRequestRecord, UserRole } from '../types';
+import { ViewState, HelpRequestRecord, UserRole, OrgInventory } from '../types';
 import { StorageService } from '../services/storage';
 import { t } from '../services/translations';
 import { 
@@ -41,6 +41,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const [userRole, setUserRole] = useState<UserRole>('GENERAL_USER');
   const [userName, setUserName] = useState('');
   const [connectedOrg, setConnectedOrg] = useState<string | null>(null);
+  const [orgInventory, setOrgInventory] = useState<OrgInventory | null>(null);
   const [tickerMessage, setTickerMessage] = useState('');
   
   // Status Ping State
@@ -58,7 +59,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
     
     if (profile.communityId) {
        const org = StorageService.getOrganization(profile.communityId);
-       if (org) setConnectedOrg(org.name);
+       if (org) {
+         setConnectedOrg(org.name);
+         setOrgInventory(StorageService.getOrgInventory(org.id));
+       }
     }
     
     // Load Active Request
@@ -87,6 +91,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
        setTickerMessage(StorageService.getTicker(updatedProfile));
        setPendingPing(updatedProfile.pendingStatusRequest);
        setActiveRequest(StorageService.getActiveRequest());
+       if (updatedProfile.communityId) {
+         setOrgInventory(StorageService.getOrgInventory(updatedProfile.communityId));
+       }
     };
     
     // Listen for custom ticker update event (same-window)
@@ -206,7 +213,35 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
           </div>
         </div>
       </div>
-      
+
+      {isOrgAdmin && connectedOrg && orgInventory && (
+        <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-xs uppercase font-bold text-slate-500">Hub Inventory</p>
+              <p className="text-base font-bold text-slate-900">{connectedOrg}</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => setView('ORG_DASHBOARD')}>
+              Manage
+            </Button>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              { label: 'Water Cases', value: orgInventory.water, unit: 'cases' },
+              { label: 'Food Boxes', value: orgInventory.food, unit: 'boxes' },
+              { label: 'Blankets', value: orgInventory.blankets, unit: 'units' },
+              { label: 'Med Kits', value: orgInventory.medicalKits, unit: 'kits' },
+            ].map(item => (
+              <div key={item.label} className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+                <p className="text-[11px] uppercase font-bold text-slate-500">{item.label}</p>
+                <p className="text-2xl font-black text-slate-900 leading-tight">{item.value}</p>
+                <p className="text-[11px] text-slate-400">{item.unit}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Org Admin Shortcut */}
       {isOrgAdmin && (
         <div 
