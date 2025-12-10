@@ -32,8 +32,6 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
   const [selectedItem, setSelectedItem] = useState('Water Cases');
   const [requestAmount, setRequestAmount] = useState(10);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
-  const [fulfillDraft, setFulfillDraft] = useState<{ id: string | null; quantity: number; orgConfirmed: boolean }>({ id: null, quantity: 0, orgConfirmed: false });
-  const [fulfillLoading, setFulfillLoading] = useState(false);
   const [stockLoading, setStockLoading] = useState(false);
 
   // Broadcast State
@@ -187,50 +185,6 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
       setIsRequesting(false);
       setRequestSuccess(false);
     }, 4000);
-  };
-
-  const handleStartFulfill = (req: ReplenishmentRequest) => {
-    setFulfillDraft({ id: req.id, quantity: req.quantity, orgConfirmed: false });
-  };
-
-  const handleSubmitFulfill = () => {
-    if (!fulfillDraft.id) return;
-    if (!Number.isFinite(fulfillDraft.quantity) || fulfillDraft.quantity < 0) {
-      alert("Enter a valid delivered quantity.");
-      return;
-    }
-
-    const request = requests.find(r => r.id === fulfillDraft.id);
-    if (!request) return;
-
-    const itemMap: Record<string, keyof OrgInventory> = {
-      'Water Cases': 'water',
-      'Food Boxes': 'food',
-      'Blankets': 'blankets',
-      'Medical Kits': 'medicalKits'
-    };
-    const key = itemMap[request.item];
-    if (!key) {
-      alert("Unknown item type.");
-      return;
-    }
-
-    const confirmMsg = `Mark as fulfilled?\nItem: ${request.item}\nDelivered: ${fulfillDraft.quantity}\nOrg: ${request.orgName}\nOrg confirmed receipt: ${fulfillDraft.orgConfirmed ? 'Yes' : 'No'}`;
-    if (!window.confirm(confirmMsg)) return;
-
-    setFulfillLoading(true);
-    StorageService.fulfillReplenishmentRequest(
-      request.id,
-      { [key]: fulfillDraft.quantity },
-      'FULFILLED',
-      fulfillDraft.orgConfirmed
-    );
-    if (fulfillDraft.orgConfirmed) {
-      setInventory(StorageService.getOrgInventory(communityId));
-    }
-    setRequests(StorageService.getOrgReplenishmentRequests(communityId));
-    setFulfillDraft({ id: null, quantity: 0, orgConfirmed: false });
-    setFulfillLoading(false);
   };
 
   const handleStock = (req: ReplenishmentRequest) => {
@@ -685,37 +639,10 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
                       </span>
                     </div>
 
-                    {req.status !== 'FULFILLED' && (
-                      <div className="mt-3 space-y-2">
-                        {fulfillDraft.id === req.id ? (
-                          <div className="flex gap-2 items-center">
-                            <input
-                              type="number"
-                              min="0"
-                              className="w-28 p-2 rounded border border-slate-300 text-sm font-bold text-slate-900"
-                              value={fulfillDraft.quantity}
-                              onChange={(e) => setFulfillDraft(prev => ({ ...prev, quantity: parseInt(e.target.value) || 0 }))}
-                            />
-                            <label className="flex items-center gap-1 text-[11px] text-slate-600 font-bold">
-                              <input 
-                                type="checkbox" 
-                                checked={fulfillDraft.orgConfirmed} 
-                                onChange={(e) => setFulfillDraft(prev => ({ ...prev, orgConfirmed: e.target.checked }))}
-                              />
-                              Org confirmed
-                            </label>
-                            <Button size="sm" onClick={handleSubmitFulfill} disabled={fulfillLoading}>
-                              {fulfillLoading ? <Loader2 size={14} className="animate-spin mr-1" /> : null}
-                              Mark Fulfilled
-                            </Button>
-                            <Button size="sm" variant="ghost" onClick={() => setFulfillDraft({ id: null, quantity: 0, orgConfirmed: false })}>Cancel</Button>
-                          </div>
-                        ) : (
-                          <Button size="sm" variant="outline" onClick={() => handleStartFulfill(req)}>
-                            Mark Fulfilled
-                          </Button>
-                        )}
-                      </div>
+                    {req.status !== 'FULFILLED' && req.status !== 'STOCKED' && (
+                      <p className="mt-2 text-[11px] text-slate-500 font-bold">
+                        Status managed by warehouse log.
+                      </p>
                     )}
 
                     {req.status === 'FULFILLED' && (
