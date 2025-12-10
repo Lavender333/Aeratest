@@ -359,7 +359,7 @@ export const StorageService = {
       } else if (req.status === 'APPROVED') {
         agg.approved += 1;
         agg.pendingQuantity += req.quantity || 0;
-      } else if (req.status === 'FULFILLED') {
+      } else if (req.status === 'FULFILLED' || req.status === 'STOCKED') {
         agg.fulfilled += 1;
       }
     });
@@ -411,6 +411,7 @@ export const StorageService = {
     db.replenishmentRequests[reqIdx].stocked = true;
     db.replenishmentRequests[reqIdx].stockedAt = new Date().toISOString();
     db.replenishmentRequests[reqIdx].stockedQuantity = Object.values(delivered).reduce((sum, v) => sum + (Number(v) || 0), 0);
+    db.replenishmentRequests[reqIdx].status = 'STOCKED';
     this.updateOrgInventory(request.orgId, updatedInventory);
     this.saveDB(db);
     return true;

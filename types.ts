@@ -106,7 +106,7 @@ export interface ReplenishmentRequest {
   orgName: string;
   item: string;
   quantity: number;
-  status: 'PENDING' | 'APPROVED' | 'FULFILLED';
+  status: 'PENDING' | 'APPROVED' | 'FULFILLED' | 'STOCKED';
   timestamp: string;
   provider: string;
   signature?: string; // Base64 data URL of the signature (Released By)

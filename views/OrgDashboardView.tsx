@@ -669,6 +669,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
                       </div>
                       <span className={`text-xs font-bold px-2 py-1 rounded-full ${
                         req.status === 'FULFILLED' ? 'bg-green-100 text-green-700' :
+                        req.status === 'STOCKED' ? 'bg-emerald-100 text-emerald-700' :
                         req.status === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
                         'bg-amber-100 text-amber-700'
                       }`}>
@@ -723,6 +724,12 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
                             Stocked at {new Date(req.stockedAt).toLocaleTimeString()}
                           </span>
                         )}
+                      </div>
+                    )}
+
+                    {req.status === 'STOCKED' && (
+                      <div className="mt-2 text-[11px] text-emerald-700 font-bold">
+                        Stocked at {req.stockedAt ? new Date(req.stockedAt).toLocaleTimeString() : '—'}
                       </div>
                     )}
                   </div>
