@@ -304,6 +304,10 @@ export const StorageService = {
 
     db.inventories[orgId] = sanitized;
     this.saveDB(db);
+    // broadcast inventory update for listeners (dashboard refresh)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('inventory-update'));
+    }
   },
 
   // --- Replenishment Requests ---
@@ -434,6 +438,9 @@ export const StorageService = {
     db.replenishmentRequests[reqIdx].status = 'STOCKED';
     this.updateOrgInventory(request.orgId, updatedInventory);
     this.saveDB(db);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new Event('inventory-update'));
+    }
     return true;
   },
 

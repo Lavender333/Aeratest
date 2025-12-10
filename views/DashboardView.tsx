@@ -111,12 +111,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
     window.addEventListener('offline', handleOffline);
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('ticker-update', handleTickerUpdate);
+    window.addEventListener('inventory-update', handleStorageChange);
 
     return () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('ticker-update', handleTickerUpdate);
+      window.removeEventListener('inventory-update', handleStorageChange);
     };
   }, []);
 
