@@ -18,6 +18,7 @@ const SEED_ORGS: OrganizationProfile[] = [
     replenishmentPhone: '555-9000',
     verified: true,
     active: true,
+    registeredPopulation: 200,
     currentBroadcast: "Choir practice cancelled. Shelter open in Gym."
   },
   { 
@@ -31,7 +32,8 @@ const SEED_ORGS: OrganizationProfile[] = [
     replenishmentEmail: 'logistics@fema.example.gov',
     replenishmentPhone: '555-9001',
     verified: true,
-    active: true
+    active: true,
+    registeredPopulation: 1200
   }
 ];
 

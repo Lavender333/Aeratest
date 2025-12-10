@@ -4,6 +4,7 @@ import { ViewState, OrgMember, OrgInventory, ReplenishmentRequest } from '../typ
 import { Button } from '../components/Button';
 import { StorageService } from '../services/storage';
 import { REQUEST_ITEM_MAP } from '../services/validation';
+import { getInventoryStatuses } from '../services/inventoryStatus';
 import { t } from '../services/translations';
 import { Building2, CheckCircle, AlertTriangle, HelpCircle, Package, ArrowLeft, Send, Truck, Copy, Save, Phone, MapPin, User, HeartPulse, BellRing, X, AlertOctagon, Loader2, Wand2, ShieldCheck, WifiOff } from 'lucide-react';
 import { Textarea } from '../components/Input';
@@ -15,6 +16,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
   const [activeTab, setActiveTab] = useState<'MEMBERS' | 'INVENTORY'>('MEMBERS');
   const [orgName, setOrgName] = useState('Community Organization');
   const [communityId, setCommunityId] = useState('');
+  const [registeredPopulation, setRegisteredPopulation] = useState<number>(0);
   const [requests, setRequests] = useState<ReplenishmentRequest[]>([]);
   
   // Member Detail State
@@ -53,6 +55,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
       setOrgName(org.name);
       setReplenishmentProvider(org.replenishmentProvider || 'General Aid Pool');
       setReplenishmentEmail(org.replenishmentEmail || '');
+      setRegisteredPopulation(org.registeredPopulation || 0);
     }
     
     // Load Live Data from Backend
@@ -210,6 +213,8 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
     setRequests(StorageService.getOrgReplenishmentRequests(communityId));
     setStockLoading(false);
   };
+
+  const status = getInventoryStatuses(inventory, registeredPopulation);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-safe animate-fade-in relative">
@@ -524,7 +529,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-               {[
+                {[
                  { label: 'Water Cases', key: 'water', unit: 'cases' },
                  { label: 'Food Boxes', key: 'food', unit: 'boxes' },
                  { label: 'Blankets', key: 'blankets', unit: 'units' },
@@ -541,7 +546,15 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
                       onChange={(e) => handleInventoryChange(item.key as keyof OrgInventory, parseInt(e.target.value))}
                     />
                     <p className="text-slate-400 text-xs mt-1">{item.unit}</p>
-                  </div>
+                    <p className={`text-[11px] font-bold mt-1 ${
+                      status[item.key as keyof OrgInventory].level === 'HIGH' ? 'text-green-600' :
+                      status[item.key as keyof OrgInventory].level === 'MEDIUM' ? 'text-amber-600' :
+                      status[item.key as keyof OrgInventory].level === 'LOW' ? 'text-red-600' :
+                      'text-slate-400'
+                    }`}>
+                      {status[item.key as keyof OrgInventory].level === 'UNKNOWN' ? 'N/A' : status[item.key as keyof OrgInventory].level}
+                    </p>
+                 </div>
                ))}
             </div>
             

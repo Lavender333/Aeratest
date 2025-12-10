@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Card } from '../components/Card';
 import { ViewState, HelpRequestRecord, UserRole, OrgInventory } from '../types';
 import { StorageService } from '../services/storage';
+import { getInventoryStatuses } from '../services/inventoryStatus';
 import { t } from '../services/translations';
 import { 
   AlertTriangle, 
@@ -41,6 +42,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const [userRole, setUserRole] = useState<UserRole>('GENERAL_USER');
   const [userName, setUserName] = useState('');
   const [connectedOrg, setConnectedOrg] = useState<string | null>(null);
+  const [orgPopulation, setOrgPopulation] = useState<number>(0);
   const [orgInventory, setOrgInventory] = useState<OrgInventory | null>(null);
   const [tickerMessage, setTickerMessage] = useState('');
   
@@ -61,6 +63,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
        const org = StorageService.getOrganization(profile.communityId);
        if (org) {
          setConnectedOrg(org.name);
+         setOrgPopulation(org.registeredPopulation || 0);
          setOrgInventory(StorageService.getOrgInventory(org.id));
        }
     }
@@ -93,6 +96,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
        setActiveRequest(StorageService.getActiveRequest());
        if (updatedProfile.communityId) {
          setOrgInventory(StorageService.getOrgInventory(updatedProfile.communityId));
+         const org = StorageService.getOrganization(updatedProfile.communityId);
+         if (org) setOrgPopulation(org.registeredPopulation || 0);
        }
     };
     
@@ -215,6 +220,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
       </div>
 
       {isOrgAdmin && connectedOrg && orgInventory && (
+        (() => {
+          const status = getInventoryStatuses(orgInventory, orgPopulation);
+          return (
         <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between">
             <div>
@@ -227,19 +235,30 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: 'Water Cases', value: orgInventory.water, unit: 'cases' },
-              { label: 'Food Boxes', value: orgInventory.food, unit: 'boxes' },
-              { label: 'Blankets', value: orgInventory.blankets, unit: 'units' },
-              { label: 'Med Kits', value: orgInventory.medicalKits, unit: 'kits' },
+              { label: 'Water Cases', value: orgInventory.water, unit: 'cases', key: 'water' as const },
+              { label: 'Food Boxes', value: orgInventory.food, unit: 'boxes', key: 'food' as const },
+              { label: 'Blankets', value: orgInventory.blankets, unit: 'units', key: 'blankets' as const },
+              { label: 'Med Kits', value: orgInventory.medicalKits, unit: 'kits', key: 'medicalKits' as const },
             ].map(item => (
               <div key={item.label} className="bg-slate-50 border border-slate-200 rounded-xl p-3">
                 <p className="text-[11px] uppercase font-bold text-slate-500">{item.label}</p>
                 <p className="text-2xl font-black text-slate-900 leading-tight">{item.value}</p>
-                <p className="text-[11px] text-slate-400">{item.unit}</p>
+                <div className="flex items-center justify-between text-[11px] text-slate-400">
+                  <span>{item.unit}</span>
+                  <span className={`font-bold ${
+                    status[item.key].level === 'HIGH' ? 'text-green-600' :
+                    status[item.key].level === 'MEDIUM' ? 'text-amber-600' :
+                    status[item.key].level === 'LOW' ? 'text-red-600' : 'text-slate-400'
+                  }`}>
+                    {status[item.key].level === 'UNKNOWN' ? 'N/A' : status[item.key].level}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         </div>
+          );
+        })()
       )}
 
       {/* Org Admin Shortcut */}

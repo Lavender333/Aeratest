@@ -98,6 +98,7 @@ export interface OrganizationProfile {
   active: boolean; // Organization status
   currentBroadcast?: string; // Scoped message for members only
   lastBroadcastTime?: string;
+  registeredPopulation?: number; // People served
 }
 
 export interface ReplenishmentRequest {
