@@ -29,11 +29,7 @@ export default function App() {
     if (StorageService.hasProfile()) {
       const profile = StorageService.getProfile();
       // Smart Routing
-      if (profile.role === 'INSTITUTION_ADMIN') {
-        setView('ORG_DASHBOARD');
-      } else {
-        setView('DASHBOARD');
-      }
+      setView('DASHBOARD');
     } else {
       setView('REGISTRATION');
     }
