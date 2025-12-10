@@ -1,5 +1,6 @@
 
 import { HelpRequestData, HelpRequestRecord, UserProfile, OrgMember, OrgInventory, OrganizationProfile, DatabaseSchema, HouseholdMember, ReplenishmentRequest } from '../types';
+import { REQUEST_ITEM_MAP } from './validation';
 
 const DB_KEY = 'aera_backend_db_v1';
 
@@ -308,6 +309,9 @@ export const StorageService = {
     const db = this.getDB();
     const org = db.organizations.find(o => o.id === orgId);
     if (!org) return false;
+
+    if (!REQUEST_ITEM_MAP[item]) return false;
+    const inventoryKey = REQUEST_ITEM_MAP[item];
 
     // Check Online Status for Sync
     const isOnline = navigator.onLine;

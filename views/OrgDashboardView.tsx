@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ViewState, OrgMember, OrgInventory, ReplenishmentRequest } from '../types';
 import { Button } from '../components/Button';
 import { StorageService } from '../services/storage';
+import { REQUEST_ITEM_MAP } from '../services/validation';
 import { t } from '../services/translations';
 import { Building2, CheckCircle, AlertTriangle, HelpCircle, Package, ArrowLeft, Send, Truck, Copy, Save, Phone, MapPin, User, HeartPulse, BellRing, X, AlertOctagon, Loader2, Wand2, ShieldCheck, WifiOff } from 'lucide-react';
 import { Textarea } from '../components/Input';
@@ -188,13 +189,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
   };
 
   const handleStock = (req: ReplenishmentRequest) => {
-    const itemMap: Record<string, keyof OrgInventory> = {
-      'Water Cases': 'water',
-      'Food Boxes': 'food',
-      'Blankets': 'blankets',
-      'Medical Kits': 'medicalKits'
-    };
-    const key = itemMap[req.item];
+    const key = REQUEST_ITEM_MAP[req.item];
     if (!key) {
       alert("Unknown item type.");
       return;
