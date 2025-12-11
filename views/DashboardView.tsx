@@ -136,11 +136,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
        setTickerMessage(StorageService.getTicker(updatedProfile));
     };
 
+    // Handle deferred finance open (e.g., from Splash)
+    const openFinanceIfFlagged = () => {
+      if (sessionStorage.getItem('openFinanceOnLoad')) {
+        setShowFinanceModal(true);
+        sessionStorage.removeItem('openFinanceOnLoad');
+      }
+    };
+    openFinanceIfFlagged();
+
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
     window.addEventListener('storage', handleStorageChange);
     window.addEventListener('ticker-update', handleTickerUpdate);
     window.addEventListener('inventory-update', handleStorageChange);
+    window.addEventListener('finance-open', openFinanceIfFlagged);
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -148,6 +158,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
       window.removeEventListener('storage', handleStorageChange);
       window.removeEventListener('ticker-update', handleTickerUpdate);
       window.removeEventListener('inventory-update', handleStorageChange);
+      window.removeEventListener('finance-open', openFinanceIfFlagged);
     };
   }, []);
 

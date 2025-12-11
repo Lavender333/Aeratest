@@ -8,10 +8,11 @@ import { StorageService } from '../services/storage';
 interface SplashViewProps {
   onEnter: () => void;
   onPresentation?: () => void; // Optional if not passed by App yet
+  onFinance?: () => void;
 }
 
 // NOTE: We need to update the prop signature in App.tsx to pass the presentation handler
-export const SplashView: React.FC<SplashViewProps & { onPresentation?: () => void }> = ({ onEnter, onPresentation }) => {
+export const SplashView: React.FC<SplashViewProps & { onPresentation?: () => void; onFinance?: () => void }> = ({ onEnter, onPresentation, onFinance }) => {
   const [lang, setLang] = useState<LanguageCode>('en');
 
   useEffect(() => {
@@ -87,6 +88,16 @@ export const SplashView: React.FC<SplashViewProps & { onPresentation?: () => voi
               className="bg-white/60 hover:bg-white border-white/50 text-slate-600 font-semibold"
             >
               <Presentation size={18} className="mr-2" /> View Presentation
+            </Button>
+          )}
+          {onFinance && (
+            <Button 
+              onClick={onFinance} 
+              variant="outline"
+              fullWidth 
+              className="border-slate-300 text-slate-700 font-semibold"
+            >
+              <Presentation size={18} className="mr-2" /> Financial Dashboard
             </Button>
           )}
 

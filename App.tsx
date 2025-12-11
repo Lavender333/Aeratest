@@ -35,10 +35,22 @@ export default function App() {
     }
   };
 
+  const handleFinanceFromSplash = () => {
+    sessionStorage.setItem('openFinanceOnLoad', '1');
+    setView('DASHBOARD');
+    window.dispatchEvent(new Event('finance-open'));
+  };
+
   const renderView = () => {
     switch (currentView) {
       case 'SPLASH':
-        return <SplashView onEnter={handleSplashComplete} onPresentation={() => setView('PRESENTATION')} />;
+        return (
+          <SplashView
+            onEnter={handleSplashComplete}
+            onPresentation={() => setView('PRESENTATION')}
+            onFinance={handleFinanceFromSplash}
+          />
+        );
       case 'PRESENTATION':
         return <PresentationView setView={setView} />;
       case 'REGISTRATION':
