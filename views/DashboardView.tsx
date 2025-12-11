@@ -556,14 +556,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
         </div>
         <ChevronRight size={16} className="text-slate-500 group-hover:text-white shrink-0" />
       </div>
-      <div className="flex justify-end">
-        <button
-          onClick={() => setShowFinanceModal(true)}
-          className="mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-600 text-white text-sm font-semibold shadow hover:from-blue-600 hover:to-indigo-700 transition-colors"
-        >
-          <BarChart3 size={16} /> Financial Dashboard
-        </button>
-      </div>
 
       {/* PENDING PING ACTION - Top Priority */}
       {pendingPing && (
