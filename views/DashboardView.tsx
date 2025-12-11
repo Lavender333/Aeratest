@@ -311,9 +311,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                 <BarChart3 size={18} />
                 <div>
                   <h3 className="font-bold">AERA Financial Intelligence Dashboard</h3>
-                  <p className="text-[11px] text-slate-400">
-                    Quiet, structured view of cost, scale, revenue, and break-even across MVP, Neighborhood, and City tiers.
-                  </p>
                 </div>
               </div>
               <button onClick={() => setShowFinanceModal(false)} className="text-slate-400 hover:text-white">
