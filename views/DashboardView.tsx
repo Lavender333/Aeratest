@@ -28,7 +28,8 @@ import {
   RefreshCw,
   Check,
   Droplets,
-  Package
+  Package,
+  Box
 } from 'lucide-react';
 import { Button } from '../components/Button';
 
