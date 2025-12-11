@@ -34,7 +34,8 @@ import {
   Target,
   Calculator,
   BarChart3,
-  Shield
+  Shield,
+  TrendingUp
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -458,7 +459,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
 
               <div className="bg-white rounded-xl p-4 shadow border border-slate-200">
                 <h4 className="font-bold text-slate-800 flex items-center gap-2 mb-2">
-                  <LineChart size={16} className="text-emerald-600" /> Break-even Curve (Subs vs Profit)
+                  <TrendingUp size={16} className="text-emerald-600" /> Break-even Curve (Subs vs Profit)
                 </h4>
                 <p className="text-xs text-slate-500 mb-2">Break-even subscribers = Monthly Cost ÷ Price per user. Shows profit/loss across subscriber counts at ${defaultPricePerUser}/user.</p>
                 <div className="h-48">
