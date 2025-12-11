@@ -237,9 +237,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
               <p className="text-base font-bold text-slate-900">{connectedOrg}</p>
               <p className="text-[11px] text-slate-500 font-bold">Members: {orgMemberCount || orgPopulation}</p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => setView('ORG_DASHBOARD')}>
-              Manage
-            </Button>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
