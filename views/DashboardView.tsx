@@ -156,6 +156,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const financeMonthlyCost = financeTier.platformCost + financeTier.peopleCost + financeTier.securityCost;
   const financeBurn = financeMonthlyCost - financeTier.grantRevenue;
   const financeUsers = financeTier.activeUsers;
+  const defaultPricePerUser = 0; // base case: free model
+  const monthlyRevenue = financeTier.grantRevenue + (financeUsers * defaultPricePerUser);
+  const monthlyProfit = monthlyRevenue - financeMonthlyCost;
+  const breakEvenUsersPrice = defaultPricePerUser > 0 ? Math.max(0, Math.ceil(financeBurn / defaultPricePerUser)) : null;
+  const projected12MonthProfit = monthlyProfit * 12;
   const initials = userName ? userName.trim().charAt(0).toUpperCase() : 'A';
 
   return (
@@ -212,7 +217,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                 <X size={22} />
               </button>
             </div>
-            <div className="p-6 space-y-4 bg-gradient-to-br from-slate-50 to-blue-50">
+            <div className="p-6 space-y-4 bg-gradient-to-br from-slate-50 to-blue-50 max-h-[75vh] overflow-y-auto">
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <p className="text-xs uppercase font-bold text-slate-500">Current Tier</p>
@@ -221,6 +226,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                 <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-lg font-semibold">
                   Month 3 of 12
                 </div>
+              </div>
+
+              <div className="bg-white rounded-xl p-4 shadow border border-slate-200 space-y-2">
+                <h4 className="text-sm font-bold text-slate-800">Quick Integration Checklist</h4>
+                <ul className="text-sm text-slate-600 list-disc list-inside space-y-1">
+                  <li>Include <code>recharts</code> and <code>lucide-react</code></li>
+                  <li>Create the component file</li>
+                  <li>Verify Tailwind CSS is working</li>
+                </ul>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
@@ -305,6 +319,24 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                   <p>- Break-even shifts with pricing: at $2/user need ~{Math.max(0, Math.ceil(financeBurn / 2)).toLocaleString()} users; at $3/user need ~{Math.max(0, Math.ceil(financeBurn / 3)).toLocaleString()}.</p>
                   <p>- Current users ({financeUsers.toLocaleString()}) {financeUsers >= Math.max(0, Math.ceil(financeBurn / 3)) ? 'meet' : 'do not meet'} the $3/user break-even threshold.</p>
                   <p>- Grants reduce or eliminate the needed paying users; if grants exceed costs, all scenarios are profitable.</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 shadow border border-slate-200 space-y-3">
+                  <h4 className="text-lg font-bold text-slate-800">Break-even & Profit Status</h4>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="bg-slate-50 rounded-lg p-3 border border-slate-200">
+                      <p className="text-xs font-semibold text-slate-600 mb-1">Break-even Users</p>
+                      <p className="text-2xl font-bold text-slate-900">
+                        {breakEvenUsersPrice === null ? 'N/A' : breakEvenUsersPrice.toLocaleString()}
+                      </p>
+                      <p className="text-xs text-slate-500">Price per user: ${defaultPricePerUser}</p>
+                    </div>
+                    <div className={`rounded-lg p-3 border ${monthlyProfit >=0 ? 'bg-emerald-50 border-emerald-200' : 'bg-orange-50 border-orange-200'}`}>
+                      <p className="text-xs font-semibold text-slate-600 mb-1">Current Month</p>
+                      <p className={`text-2xl font-bold ${monthlyProfit >=0 ? 'text-emerald-700' : 'text-orange-700'}`}>
+                        {monthlyProfit >=0 ? 'Profit' : 'Loss'} ${Math.abs(monthlyProfit).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
