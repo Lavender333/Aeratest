@@ -174,6 +174,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const isOrgAdmin = userRole === 'INSTITUTION_ADMIN';
   const isContractor = userRole === 'CONTRACTOR';
   const isGeneralUser = userRole === 'GENERAL_USER';
+  const isProStatusViewer = userRole === 'ADMIN' || userRole === 'FIRST_RESPONDER';
 
   /**
    * Financial model defaults aligned with AERA business plan:
@@ -778,7 +779,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
       </div>
 
       {/* Analytics / Stats Preview - Only for Pros */}
-      {isResponder && (
+      {isProStatusViewer && (
         <Card 
           title="Community Status (Pro)" 
           icon={<BarChart2 size={20} />}
