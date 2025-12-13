@@ -153,6 +153,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
     window.addEventListener('ticker-update', handleTickerUpdate);
     window.addEventListener('inventory-update', handleStorageChange);
     window.addEventListener('finance-open', openFinanceIfFlagged);
+    if (profile.communityId) {
+      const orgId = profile.communityId;
+      getBroadcast(orgId)
+        .then((resp) => {
+          if (resp?.message) setTickerMessage(`[${connectedOrg || orgId} Update] ${resp.message}`);
+        })
+        .catch(() => {});
+    }
 
     return () => {
       window.removeEventListener('online', handleOnline);

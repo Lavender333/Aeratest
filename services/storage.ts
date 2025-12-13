@@ -1,7 +1,7 @@
 
 import { HelpRequestData, HelpRequestRecord, UserProfile, OrgMember, OrgInventory, OrganizationProfile, DatabaseSchema, HouseholdMember, ReplenishmentRequest } from '../types';
 import { REQUEST_ITEM_MAP } from './validation';
-import { getInventory, saveInventory } from './api';
+import { getInventory, saveInventory, getBroadcast, setBroadcast } from './api';
 import { getMemberStatus, setMemberStatus } from './api';
 
 const DB_KEY = 'aera_backend_db_v1';
@@ -737,6 +737,7 @@ export const StorageService = {
       db.organizations[idx].lastBroadcastTime = new Date().toISOString();
       this.saveDB(db);
       window.dispatchEvent(new Event('ticker-update'));
+      setBroadcast(orgId, message).catch((e) => console.warn('Broadcast API failed', e));
     }
   },
   

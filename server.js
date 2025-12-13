@@ -5,6 +5,7 @@ import 'dotenv/config';
 import { Inventory } from './models/inventory.js';
 import { Request } from './models/request.js';
 import { MemberStatus } from './models/memberStatus.js';
+import { Broadcast } from './models/broadcast.js';
 
 const app = express();
 app.use(cors());
@@ -127,6 +128,21 @@ app.post('/api/orgs/:orgId/status', async (req, res) => {
     { safe: 0, danger: 0, unknown: 0 }
   );
   res.json({ ok: true, counts, members });
+});
+
+// Broadcast / Ticker
+app.get('/api/orgs/:orgId/broadcast', async (req, res) => {
+  const orgId = req.params.orgId;
+  const doc = await Broadcast.findOne({ orgId }).lean();
+  res.json(doc || { orgId, message: '' });
+});
+
+app.post('/api/orgs/:orgId/broadcast', async (req, res) => {
+  const orgId = req.params.orgId;
+  const { message = '' } = req.body || {};
+  await Broadcast.updateOne({ orgId }, { $set: { message } }, { upsert: true });
+  const doc = await Broadcast.findOne({ orgId }).lean();
+  res.json(doc);
 });
 
 const port = process.env.PORT || 4000;

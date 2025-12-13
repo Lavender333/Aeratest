@@ -58,3 +58,19 @@ export async function setMemberStatus(orgId: string, payload: { memberId: string
   if (!res.ok) throw new Error('Failed to save member status');
   return res.json();
 }
+
+export async function getBroadcast(orgId: string) {
+  const res = await fetch(`${API_BASE}/api/orgs/${orgId}/broadcast`);
+  if (!res.ok) throw new Error('Failed to load broadcast');
+  return res.json();
+}
+
+export async function setBroadcast(orgId: string, message: string) {
+  const res = await fetch(`${API_BASE}/api/orgs/${orgId}/broadcast`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message }),
+  });
+  if (!res.ok) throw new Error('Failed to save broadcast');
+  return res.json();
+}
