@@ -72,6 +72,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const [financeScenario, setFinanceScenario] = useState<'low' | 'medium' | 'high'>('medium');
   const [financePrice, setFinancePrice] = useState<number>(2);
   const [financeUsersInput, setFinanceUsersInput] = useState<number>(3000);
+  const [inventoryFallback, setInventoryFallback] = useState(false);
   
   // Status Ping State
   const [pendingPing, setPendingPing] = useState<{ requesterName: string, timestamp: string } | undefined>(undefined);
@@ -92,7 +93,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
          setConnectedOrg(org.name);
          setOrgPopulation(org.registeredPopulation || 0);
          setOrgMemberCount(StorageService.getOrgMembers(org.id).length);
-         StorageService.fetchOrgInventoryRemote(org.id).then(setOrgInventory);
+         StorageService.fetchOrgInventoryRemote(org.id).then(({ inventory, fromCache }) => {
+           setOrgInventory(inventory);
+           setInventoryFallback(fromCache);
+         });
        }
     }
     
@@ -127,7 +131,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
          if (org) {
            setOrgPopulation(org.registeredPopulation || 0);
            setOrgMemberCount(StorageService.getOrgMembers(updatedProfile.communityId).length);
-           StorageService.fetchOrgInventoryRemote(org.id).then(setOrgInventory);
+           StorageService.fetchOrgInventoryRemote(org.id).then(({ inventory, fromCache }) => {
+             setOrgInventory(inventory);
+             setInventoryFallback(fromCache);
+           });
          }
        }
     };
@@ -515,6 +522,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
               <p className="text-xs uppercase font-bold text-emerald-700">Hub Inventory</p>
               <p className="text-base font-bold text-slate-900">{connectedOrg}</p>
               <p className="text-[11px] text-slate-500 font-bold">Members: {orgMemberCount || orgPopulation}</p>
+              {inventoryFallback && (
+                <p className="text-[11px] text-amber-600 font-semibold">Using cached inventory (API unavailable).</p>
+              )}
             </div>
             <Button size="sm" variant="outline" onClick={() => setView('ORG_DASHBOARD')}>
               Manage

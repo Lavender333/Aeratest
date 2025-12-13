@@ -19,6 +19,8 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
   const [communityId, setCommunityId] = useState('');
   const [registeredPopulation, setRegisteredPopulation] = useState<number>(0);
   const [requests, setRequests] = useState<ReplenishmentRequest[]>([]);
+  const [inventoryFallback, setInventoryFallback] = useState(false);
+  const [requestsFallback, setRequestsFallback] = useState(false);
   
   // Member Detail State
   const [selectedMember, setSelectedMember] = useState<OrgMember | null>(null);
@@ -62,8 +64,19 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
     
     // Load Live Data from Backend
     setMembers(StorageService.getOrgMembers(id));
-    setInventory(StorageService.getOrgInventory(id));
-    listRequests(id).then(setRequests).catch(() => setRequests(StorageService.getOrgReplenishmentRequests(id)));
+    StorageService.fetchOrgInventoryRemote(id).then(({ inventory, fromCache }) => {
+      setInventory(inventory);
+      setInventoryFallback(fromCache);
+    });
+    listRequests(id)
+      .then((data) => {
+        setRequestsFallback(false);
+        setRequests(data);
+      })
+      .catch(() => {
+        setRequestsFallback(true);
+        setRequests(StorageService.getOrgReplenishmentRequests(id));
+      });
     StorageService.fetchMemberStatus(id).then((resp) => {
       if (resp?.counts) setStatusCounts(resp.counts);
       if (resp?.members?.length) setMembers(resp.members as any);
@@ -99,6 +112,7 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
     const summary = `Water: ${inventory.water}\nFood: ${inventory.food}\nBlankets: ${inventory.blankets}\nMed Kits: ${inventory.medicalKits}\n\nSave these counts?`;
     if (!window.confirm(summary)) return;
     StorageService.updateOrgInventory(communityId, inventory);
+    StorageService.saveOrgInventoryRemote(communityId, inventory);
     setHasChanges(false);
     alert("Inventory Updated in Central Database");
   };
@@ -237,6 +251,15 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col pb-safe animate-fade-in relative">
+      {(inventoryFallback || requestsFallback) && (
+        <div className="mx-4 mb-2 text-xs text-amber-700 font-semibold bg-amber-50 border border-amber-200 rounded-lg p-2 flex items-center justify-between">
+          <span>
+            {inventoryFallback && 'Using cached inventory'}{inventoryFallback && requestsFallback ? ' • ' : ''}
+            {requestsFallback && 'Using cached requests'}
+          </span>
+          <span className="text-amber-500">Check API connection</span>
+        </div>
+      )}
       {/* Broadcast Modal */}
       {showBroadcastModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">

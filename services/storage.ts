@@ -295,12 +295,13 @@ export const StorageService = {
     return db.inventories[orgId] || { water: 0, food: 0, blankets: 0, medicalKits: 0 };
   },
 
-  async fetchOrgInventoryRemote(orgId: string): Promise<OrgInventory> {
+  async fetchOrgInventoryRemote(orgId: string): Promise<{ inventory: OrgInventory, fromCache: boolean }> {
     try {
-      return await getInventory(orgId);
+      const inventory = await getInventory(orgId);
+      return { inventory, fromCache: false };
     } catch (e) {
       console.warn('API inventory fetch failed, falling back to local', e);
-      return this.getOrgInventory(orgId);
+      return { inventory: this.getOrgInventory(orgId), fromCache: true };
     }
   },
 
