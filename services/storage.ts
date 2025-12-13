@@ -1,6 +1,7 @@
 
 import { HelpRequestData, HelpRequestRecord, UserProfile, OrgMember, OrgInventory, OrganizationProfile, DatabaseSchema, HouseholdMember, ReplenishmentRequest } from '../types';
 import { REQUEST_ITEM_MAP } from './validation';
+import { getInventory, saveInventory } from './api';
 
 const DB_KEY = 'aera_backend_db_v1';
 
@@ -291,6 +292,27 @@ export const StorageService = {
   getOrgInventory(orgId: string): OrgInventory {
     const db = this.getDB();
     return db.inventories[orgId] || { water: 0, food: 0, blankets: 0, medicalKits: 0 };
+  },
+
+  async fetchOrgInventoryRemote(orgId: string): Promise<OrgInventory> {
+    try {
+      return await getInventory(orgId);
+    } catch (e) {
+      console.warn('API inventory fetch failed, falling back to local', e);
+      return this.getOrgInventory(orgId);
+    }
+  },
+
+  async saveOrgInventoryRemote(orgId: string, inventory: OrgInventory): Promise<boolean> {
+    try {
+      await saveInventory(orgId, inventory);
+      // cache locally too
+      this.saveOrgInventory(orgId, inventory);
+      return true;
+    } catch (e) {
+      console.warn('API inventory save failed, keeping local only', e);
+      return false;
+    }
   },
 
   updateOrgInventory(orgId: string, inventory: OrgInventory) {
