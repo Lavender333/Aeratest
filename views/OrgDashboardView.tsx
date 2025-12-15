@@ -210,13 +210,6 @@ export const OrgDashboardView: React.FC<{ setView: (v: ViewState) => void }> = (
       console.error(e);
       alert('Failed to submit request. Please try again.');
     }
-
-    // Simulated email (optional)
-    if (replenishmentEmail && navigator.onLine) {
-      const subject = `Urgent Resupply Request - ${communityId} - ${orgName}`;
-      const body = `To ${replenishmentProvider},%0D%0A%0D%0APlease fulfill the following emergency supply request:%0D%0A%0D%0AItem: ${selectedItem}%0D%0AQuantity: ${requestAmount}%0D%0A%0D%0AHub: ${orgName}%0D%0AID: ${communityId}%0D%0A%0D%0ASent via AERA App`;
-      window.location.href = `mailto:${replenishmentEmail}?subject=${subject}&body=${body}`;
-    }
     
     setTimeout(() => {
       setIsRequesting(false);
