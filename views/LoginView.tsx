@@ -35,13 +35,30 @@ export const LoginView: React.FC<{ setView: (v: ViewState) => void }> = ({ setVi
     setInfo('');
     try {
       // Login without password - just use email
+      console.log('Attempting login with email:', email);
       await StorageService.loginWithCredentials(email, '');
       const profile = StorageService.getProfile();
+      console.log('Login successful! Profile:', { 
+        id: profile.id, 
+        name: profile.fullName, 
+        role: profile.role, 
+        onboardComplete: profile.onboardComplete 
+      });
       const needsSetup = !profile.onboardComplete;
-      if (needsSetup) setView('ACCOUNT_SETUP');
-      else if (profile.role === 'INSTITUTION_ADMIN') setView('ORG_DASHBOARD');
-      else setView('DASHBOARD');
+      if (needsSetup) {
+        console.log('User needs setup, redirecting to ACCOUNT_SETUP');
+        setView('ACCOUNT_SETUP');
+      }
+      else if (profile.role === 'INSTITUTION_ADMIN') {
+        console.log('Institution admin, redirecting to ORG_DASHBOARD');
+        setView('ORG_DASHBOARD');
+      }
+      else {
+        console.log('Regular user, redirecting to DASHBOARD');
+        setView('DASHBOARD');
+      }
     } catch (e: any) {
+      console.error('Login error:', e);
       setError(e?.message || 'Login failed.');
     }
   };
@@ -49,22 +66,37 @@ export const LoginView: React.FC<{ setView: (v: ViewState) => void }> = ({ setVi
   const handleDemoLogin = (demoPhone: string) => {
     // We set the state and immediately trigger login logic to avoid double-click requirement
     setPhone(demoPhone);
+    console.log('Demo login with phone:', demoPhone);
     const result = StorageService.loginUser(demoPhone);
     
     if (!result.success) {
+      console.error('Demo login failed:', result.message);
       setError(result.message || 'Demo Login Failed');
       return;
     }
     
     // Check role immediately for the direct action
     const profile = StorageService.getProfile();
-    console.log('Demo login profile:', profile); // Debug log
+    console.log('Demo login successful! Profile:', { 
+      id: profile.id, 
+      name: profile.fullName, 
+      role: profile.role, 
+      onboardComplete: profile.onboardComplete 
+    });
     const needsSetup = !profile.onboardComplete;
-    console.log('Needs setup?', needsSetup, 'onboardComplete:', profile.onboardComplete); // Debug log
     
-    if (needsSetup) setView('ACCOUNT_SETUP');
-    else if (profile.role === 'INSTITUTION_ADMIN') setView('ORG_DASHBOARD');
-    else setView('DASHBOARD');
+    if (needsSetup) {
+      console.log('User needs setup, redirecting to ACCOUNT_SETUP');
+      setView('ACCOUNT_SETUP');
+    }
+    else if (profile.role === 'INSTITUTION_ADMIN') {
+      console.log('Institution admin, redirecting to ORG_DASHBOARD');
+      setView('ORG_DASHBOARD');
+    }
+    else {
+      console.log('Regular user, redirecting to DASHBOARD');
+      setView('DASHBOARD');
+    }
   };
 
   return (
