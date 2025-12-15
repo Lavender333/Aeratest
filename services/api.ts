@@ -2,6 +2,11 @@ import type { OrgInventory } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
+// Log API base URL for debugging
+if (typeof window !== 'undefined') {
+  console.log('🔗 API Base URL:', API_BASE);
+}
+
 export async function getInventory(orgId: string): Promise<OrgInventory> {
   const res = await fetch(`${API_BASE}/api/orgs/${orgId}/inventory`);
   if (!res.ok) throw new Error('Failed to load inventory');
@@ -87,13 +92,21 @@ export async function registerAuth(payload: { email?: string; phone?: string; pa
 }
 
 export async function loginAuth(payload: { email?: string; phone?: string; password: string }) {
-  const res = await fetch(`${API_BASE}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-  if (!res.ok) throw new Error('Failed to login');
-  return res.json(); // { token, user }
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.error || 'Failed to login');
+    }
+    return res.json(); // { token, user }
+  } catch (err: any) {
+    console.error('Login API error:', err);
+    throw err;
+  }
 }
 
 export async function forgotPassword(payload: { email: string }) {
