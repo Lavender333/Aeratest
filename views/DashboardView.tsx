@@ -74,6 +74,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const [financePrice, setFinancePrice] = useState<number>(2);
   const [financeUsersInput, setFinanceUsersInput] = useState<number>(3000);
   const [inventoryFallback, setInventoryFallback] = useState(false);
+  const [showOpDef, setShowOpDef] = useState(false);
   
   // Status Ping State
   const [pendingPing, setPendingPing] = useState<{ requesterName: string, timestamp: string } | undefined>(undefined);
@@ -353,11 +354,63 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                 </div>
               </div>
 
-              {/* Scenario: fixed to High per product decision */}
+              {/* Scenario Switcher (High / Medium / Low) + Operational Cost Definition toggle */}
               <div className="flex items-center gap-2">
                 <p className="text-xs uppercase font-bold text-slate-500">Scenario</p>
-                <div className="bg-emerald-600 text-white px-3 py-2 rounded-lg font-bold text-xs ml-2">HIGH</div>
+                <div className="flex items-center gap-2 ml-2">
+                  {(['high','medium','low'] as const).map((scenario) => (
+                    <button
+                      key={scenario}
+                      onClick={() => setFinanceScenario(scenario)}
+                      className={`px-3 py-2 rounded-lg text-xs font-bold border uppercase tracking-wide ${
+                        financeScenario === scenario
+                          ? 'bg-emerald-600 text-white border-emerald-600'
+                          : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-300'
+                      }`}
+                    >
+                      {scenario === 'high' ? 'High Operational Cost' : scenario === 'medium' ? 'Medium Operational Cost' : 'Low Operational Cost'}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setShowOpDef(s => !s)}
+                    className="ml-3 text-sm text-slate-600 underline"
+                  >
+                    Operational Cost Definition
+                  </button>
+                </div>
               </div>
+
+              {showOpDef && (
+                <div className="bg-white rounded-xl p-4 shadow border border-slate-200 mt-3 text-sm">
+                  <h5 className="font-bold mb-2">Operational Cost Definition</h5>
+                  <ul className="list-disc ml-5 space-y-1">
+                    <li>Hosting & compute: VMs/containers, serverless runtime, autoscaling instances.</li>
+                    <li>Databases & storage: primary DB, object storage, backups.</li>
+                    <li>Network & CDN: bandwidth, egress, load balancers, CDN caching.</li>
+                    <li>Monitoring & logging: observability tooling, retention, alerting.</li>
+                    <li>Backups & disaster recovery: snapshot storage, multi‑region replication.</li>
+                    <li>Security & compliance: WAF, vulnerability scanning, audits, certs.</li>
+                    <li>Support & operations: SRE/DevOps on‑call, incident response, runbook time.</li>
+                    <li>Third‑party services & licenses: maps, SMS/email gateways, analytics, paid APIs.</li>
+                    <li>Integrations & data pipelines: ETL, message queues, 3rd‑party connectors.</li>
+                    <li>Capacity buffer / redundancy: spare capacity, concurrent/peak provisioning.</li>
+                  </ul>
+
+                  <div className="mt-3">
+                    <h6 className="font-semibold mb-2">What each scenario supports (current tier: {financeTier.name})</h6>
+                    <div className="grid md:grid-cols-3 gap-3">
+                      {(['low','medium','high'] as const).map((s) => (
+                        <div key={s} className="p-3 border rounded-lg bg-slate-50">
+                          <p className="font-bold uppercase text-xs mb-1">{s}</p>
+                          <p className="text-xs">Cost range: ${financeTier.costs[s][0].toLocaleString()} — ${financeTier.costs[s][1].toLocaleString()}</p>
+                          <p className="text-xs mt-1">Capacity (approx): {financeTier.capacity.total}</p>
+                          <p className="text-xs">MAU: {financeTier.capacity.mau}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Snapshot + Inputs */}
               <div className="bg-white rounded-xl p-4 shadow border border-slate-200 space-y-3">
