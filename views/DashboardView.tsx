@@ -350,7 +350,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                   </p>
                 </div>
                 <div className="bg-slate-900 text-slate-100 px-4 py-2 rounded-lg font-semibold text-xs shadow-sm">
-                  Financial snapshot (lightweight)
+                  Financial snapshot
                 </div>
               </div>
 
