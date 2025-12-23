@@ -70,7 +70,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
   const [tickerMessage, setTickerMessage] = useState('');
   const [showFinanceModal, setShowFinanceModal] = useState(false);
   const [financeTierKey, setFinanceTierKey] = useState<'tier1' | 'tier2' | 'tier3'>('tier2');
-  const [financeScenario, setFinanceScenario] = useState<'low' | 'medium' | 'high'>('medium');
+  const [financeScenario, setFinanceScenario] = useState<'low' | 'medium' | 'high'>('high');
   const [financePrice, setFinancePrice] = useState<number>(2);
   const [financeUsersInput, setFinanceUsersInput] = useState<number>(3000);
   const [inventoryFallback, setInventoryFallback] = useState(false);
@@ -353,36 +353,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ setView }) => {
                 </div>
               </div>
 
-              {/* Tier & Scenario Switchers */}
-              <div className="flex flex-wrap gap-2">
-                {(['tier1','tier2','tier3'] as const).map((tier) => (
-                  <button
-                    key={tier}
-                    onClick={() => setFinanceTierKey(tier)}
-                    className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
-                      financeTierKey === tier
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
-                    }`}
-                  >
-                    {financeTierDefaults[tier].name}
-                  </button>
-                ))}
-                <div className="flex items-center gap-1 ml-auto">
-                  {(['low','medium','high'] as const).map((scenario) => (
-                    <button
-                      key={scenario}
-                      onClick={() => setFinanceScenario(scenario)}
-                      className={`px-3 py-2 rounded-lg text-xs font-bold border uppercase tracking-wide ${
-                        financeScenario === scenario
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-white border-slate-200 text-slate-700 hover:border-emerald-300'
-                      }`}
-                    >
-                      {scenario}
-                    </button>
-                  ))}
-                </div>
+              {/* Scenario: fixed to High per product decision */}
+              <div className="flex items-center gap-2">
+                <p className="text-xs uppercase font-bold text-slate-500">Scenario</p>
+                <div className="bg-emerald-600 text-white px-3 py-2 rounded-lg font-bold text-xs ml-2">HIGH</div>
               </div>
 
               {/* Snapshot + Inputs */}
